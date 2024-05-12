@@ -1,0 +1,48 @@
+.sau-file {
+    display: none;
+    width: 150px;
+    margin: 5px;
+    color: transparent;
+}
+
+.sau-row {
+    display: table-row;
+}
+
+.sau-cell-text {
+    font-size: 12px;
+    display: table-cell;
+}
+
+.sau-cell-range {
+    display: table-cell;
+    width: 100%;
+}
+
+.sau-link {
+    font-size: 15px;
+    font-weight: bold;
+    color: blue;
+    cursor: pointer;
+    opacity: 1;
+    text-align: left;
+}
+.sau-head {
+
+}
+.canvas-sau{
+    background: cornsilk;
+}
+
+.sau-attribute {
+    text-align: center;
+}
+
+.sau-link:hover {
+    opacity: .7;
+}
+
+.sau-link:active {
+    opacity: 1;
+    color: #f30b0b;
+}
