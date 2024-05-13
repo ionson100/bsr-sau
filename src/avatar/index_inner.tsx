@@ -1,322 +1,368 @@
-import React, {ChangeEvent, FC, ReactElement, useEffect, useRef} from 'react';
+import React, {ChangeEvent, Component, createRef} from 'react';
 import './index.css'
 
 
-type  AvatarProps =
-    {
+interface AvatarProps {
 
-        canvasSize: number,
-        selectedFile?: (f: File | null) => boolean,
-        callbackFormData?:  | object | string,
-        url?: string,
-        headerKeyValue?: { [key: string]: string },
-        beforeUpload?: () => void,
-        clientError?: (event: string) => void,
-        progress?: (events: ProgressEvent<XMLHttpRequestEventTarget>) => void,
-        preview?: (events: string) => void,
-        previewAsync?: (events: string) => void,
-        done?: (events: any) => void,
-        serverError?: (events: string) => void,
-        visibleLinkPreview?: boolean,
-        className?: string,
-        classNameCanvas?: string
+    canvasSize: number,
+    selectedFile?: (f: File | null) => boolean,
+    callbackFormData?: | object | string,
+    url?: string,
+    headerKeyValue?: { [key: string]: string },
+    beforeUpload?: () => void,
+    clientError?: (event: string) => void,
+    progress?: (events: ProgressEvent<XMLHttpRequestEventTarget>) => void,
+    preview?: (events: string) => void,
+    previewAsync?: (events: string) => void,
+    done?: (events: any) => void,
+    serverError?: (events: string) => void,
+    visibleLinkPreview?: boolean,
+    className?: string,
+    classNameCanvas?: string
 
 
+}
+
+ export const AvatarUploader = class extends Component<AvatarProps, any> {
+    static defaultProps: AvatarProps = {
+        canvasSize: 200,
+        selectedFile: undefined,
+        callbackFormData: undefined,
+        url: undefined,
+        headerKeyValue: undefined,
+        beforeUpload: undefined,
+        clientError: undefined,
+        progress: undefined,
+        preview: undefined,
+        previewAsync: undefined,
+        done: undefined,
+        serverError: undefined,
+        visibleLinkPreview: undefined,
+        className: 'sau',
+        classNameCanvas: 'canvas-sau'
+    };
+    public readonly mRefInputFile: React.RefObject<HTMLInputElement>;
+    public readonly mRefZoom: React.RefObject<HTMLInputElement>;
+    public readonly mRefRotDiv: React.RefObject<HTMLDivElement>;
+    public readonly mRefPanelButtons: React.RefObject<HTMLDivElement>;
+    public readonly mRefCanvas: React.RefObject<HTMLCanvasElement>;
+    public readonly mRefLink1: React.RefObject<HTMLDivElement>
+    public readonly mRefLink2: React.RefObject<HTMLDivElement>;
+
+    public readonly coord: { x: number, y: number };
+    public readonly coordE: { x: number, y: number };
+    public readonly coordS: { x: number, y: number };
+
+    public base_image: HTMLImageElement | undefined;
+    public isStart: boolean;
+    public mFile: any;
+    public imageSize: {
+        width: number,
+        height: number,
+        scaleW: number,
     }
-
- const AvatarUploader: FC<AvatarProps> = ({
-                                                    canvasSize = 200,
-                                                    selectedFile,
-                                                    callbackFormData,
-                                                    url = '/',
-                                                    headerKeyValue,
-                                                    beforeUpload,
-                                                    clientError,
-                                                    progress,
-                                                    preview,
-                                                    previewAsync,
-                                                    done,
-                                                    serverError,
-                                                    visibleLinkPreview,
-                                                    className = 'sau',
-                                                    classNameCanvas = 'canvas-sau'
-
-                                                }): ReactElement => {
-
-    const coord = {x: 0, y: 0};
-    const coordE = {x: 0, y: 0};
-    const coordS = {x: 0, y: 0};
-    let base_image:  HTMLImageElement|undefined = undefined;
-    let isStart = false;
-
-    let mFile: any = undefined;
-    let imageSize = {
-        width: canvasSize,
-        height: canvasSize,
-        scaleW: canvasSize,
-    }
-    let mContext: CanvasRenderingContext2D | null = null;
-
-    const mRefInputFile = React.useRef<HTMLInputElement>(null);
-    const mRefZoom = useRef<HTMLInputElement>(null);
-    const mRefRotDiv = useRef<HTMLDivElement>(null)
-    const mRefPanelButtons = useRef<HTMLDivElement>(null)
-    const mRefCanvas = useRef<HTMLCanvasElement>(null);
-    const mRefLink1 = useRef<HTMLDivElement>(null);
-    const mRefLink2 = useRef<HTMLDivElement>(null)
+    public mContext: CanvasRenderingContext2D | null;
 
 
-    useEffect(() => {
-        mRefCanvas.current!.width = canvasSize
-        mRefCanvas.current!.height = canvasSize
-        mRefRotDiv.current!.style.width = `${canvasSize}px`;
-        mRefRotDiv.current!.style.padding = `5px`;
-        mContext = mRefCanvas!.current!.getContext('2d');
 
-        mContext!.canvas.addEventListener("wheel", wheel);
-        mContext!.canvas.addEventListener("mousedown", start);
-        mContext!.canvas.addEventListener("mouseout", stop);
-        mContext!.canvas.addEventListener("mouseup", stop);
-        if (visibleLinkPreview !== true) {
-            mRefLink1.current!.style.display = "none"
+    constructor(props: Readonly<AvatarProps>) {
+        super(props);
+        this.mRefInputFile = createRef()
+        this.mRefZoom = createRef()
+        this.mRefRotDiv = createRef()
+        this.mRefPanelButtons = createRef()
+        this.mRefCanvas = createRef()
+        this.mRefLink1 = createRef()
+        this.mRefLink2 = createRef()
+
+        this.coord = {x: 0, y: 0};
+        this.coordE = {x: 0, y: 0};
+        this.coordS = {x: 0, y: 0};
+        this.base_image = undefined;
+        this.isStart = false;
+        this.mFile = undefined;
+        this.imageSize = {
+            width: this.props.canvasSize,
+            height: this.props.canvasSize,
+            scaleW: this.props.canvasSize,
         }
-    }, [])
+        this.mContext = null;
+
+        this.onFileChange=this.onFileChange.bind(this)
+        this.previewF=this.previewF.bind(this);
+        this.formUpload=this.formUpload.bind(this);
+        this.stop=this.stop.bind(this);
+        this.start=this.start.bind(this)
+        this.wheel=this.wheel.bind(this)
+        this.draw=this.draw.bind(this)
+    }
+
+    componentDidMount() {
+
+        this.mRefCanvas.current!.width = this.props.canvasSize
+        this.mRefCanvas.current!.height = this.props.canvasSize
+        this.mRefRotDiv.current!.style.width = `${this.props.canvasSize}px`;
+        this.mRefRotDiv.current!.style.padding = `5px`;
+        this.mContext = this.mRefCanvas.current!.getContext('2d');
+        //
+        this.mContext!.canvas.addEventListener("wheel", this.wheel);
+        this.mContext!.canvas.addEventListener("mousedown", this.start);
+        this.mContext!.canvas.addEventListener("mouseout", this.stop);
+        this.mContext!.canvas.addEventListener("mouseup", this.stop);
+        if (this.props.visibleLinkPreview !== true) {
+            this.mRefLink1.current!.style.display = "none"
+        }
+    }
 
 
-    const wheel = (e: WheelEvent) => {
-        if (!mFile) return;
+    wheel(e: WheelEvent) {
+        if (!this.mFile) return;
         e = e || window.event;
-        const v = parseInt(mRefZoom!.current!.value)
+        const v = parseInt(this.mRefZoom!.current!.value)
         const delta = e.deltaY || e.detail || e.deltaY;
         if (delta > 0 && v < 99) {
-            mRefZoom.current!.value! = (v + 1) + "";
-            zoomImage(100 - v)
+            this.mRefZoom.current!.value! = (v + 1) + "";
+            this.zoomImage(100 - v)
         }
         if (delta < 0 && v > 0) {
-            mRefZoom.current!.value! = (v - 1) + "";
-            zoomImage(100 - v)
+            this.mRefZoom.current!.value! = (v - 1) + "";
+            this.zoomImage(100 - v)
         }
     }
 
-    const start = (e: MouseEvent) => {
-        mRefCanvas.current!.addEventListener("mousemove", draw);
-        reposition(e);
-        isStart = true;
+    start(e: MouseEvent) {
+
+        this.mRefCanvas.current!.addEventListener("mousemove", this.draw);
+        this.reposition(e);
+        this.isStart = true;
     }
 
-    const stop = () => {
-        if (!mFile) return;
-        if (isStart) {
-            coordS.x = coordE.x;
-            coordS.y = coordE.y
-            mRefCanvas.current!.removeEventListener("mousemove", draw);
-            isStart = false;
+    stop() {
+        if (!this.mFile) return;
+        if (this.isStart) {
+            this.coordS.x = this.coordE.x;
+            this.coordS.y = this.coordE.y
+            this.mRefCanvas.current!.removeEventListener("mousemove", this.draw);
+            this.isStart = false;
         }
-
     }
 
-    const reposition = (e: MouseEvent) => {
-        coord.x = e.offsetX
-        coord.y = e.offsetY;
+    reposition(e: MouseEvent) {
+        this.coord.x = e.offsetX
+        this.coord.y = e.offsetY;
     }
 
-    const draw = (e: MouseEvent) => {
-        if (!mFile) return;
-        coordE.x = coordS.x + e.offsetX - coord.x;
-        coordE.y = coordS.y + e.offsetY - coord.y;
-        console.log(coordE.x + "  " + coordE.y)
-        drawImageE();
+    draw(e: MouseEvent) {
+        if (!this.mFile) return;
+        this.coordE.x = this.coordS.x + e.offsetX - this.coord.x;
+        this.coordE.y = this.coordS.y + e.offsetY - this.coord.y;
+
+        this.drawImageE();
     }
 
-    const onFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onFileChange(event: ChangeEvent<HTMLInputElement>){
 
 
         const fs = event.target.files;
         if (!fs) {
             return
         }
-        mFile = fs!.item(0)
+        this.mFile = fs!.item(0)
 
-        if (selectedFile) {
-            if (!selectedFile(mFile)) {
+        if (this.props.selectedFile) {
+            if (!this.props.selectedFile(this.mFile)) {
                 return;
             }
         }
 
-        mRefZoom.current!.value = "0";
-        coordE.x = coordE.y = coordS.x = coordS.y = coord.x = coord.y = 0;
-        imageSize = {
-            width: canvasSize,
-            height: canvasSize,
+        this.mRefZoom.current!.value = "0";
+        this.coordE.x = this.coordE.y = this.coordS.x = this.coordS.y = this.coord.x = this.coord.y = 0;
+        this.imageSize = {
+            width: this.props.canvasSize,
+            height: this.props.canvasSize,
             scaleW: 100,
-
         }
 
 
-        const imgSrc = window.URL.createObjectURL(mFile);
-        base_image = new Image();
-        base_image.src = imgSrc;
-        base_image.onload = function () {
-            imageSize.width = base_image!.width
-            imageSize.height = base_image!.height;
-            drawImageE()
+
+
+
+        const imgSrc = window.URL.createObjectURL(this.mFile);
+        this.base_image = new Image();
+        this.base_image.src = imgSrc;
+        this.base_image.onload=()=>{
+            if(this.base_image?.width){
+                this.imageSize.width=this.base_image.width
+            }
+            if(this.base_image?.height){
+                this.imageSize.height=this.base_image.height
+            }
+            this.drawImageE();
+
         }
-        mRefPanelButtons.current!.style.visibility = "visible";
+        this.mRefPanelButtons.current!.style.visibility = "visible";
+
+
 
 
     }
 
-    const drawImageE = () => {
-        mContext!.clearRect(0, 0, mContext!.canvas.width, mContext!.canvas.height);
-        mContext!.drawImage(base_image!, coordE.x, coordE.y, getWidth(), getHeight());
-        if (previewAsync) {
-            previewAsync(mContext!.canvas.toDataURL())
-        }
-    }
-
-    const zoomImage = (v: number) => {
-        if (!mFile) return;
-
-        imageSize.scaleW = v;
-
-        drawImageE()
-    }
-
-    const previewF = () => {
-        if (preview) {
-            preview(mContext!.canvas.toDataURL())
+    drawImageE() {
+        this.mContext!.clearRect(0, 0, this.mContext!.canvas.width, this.mContext!.canvas.height);
+        this.mContext!.drawImage(this.base_image!, this.coordE.x, this.coordE.y, this.getWidth(), this.getHeight());
+        if (this.props.previewAsync) {
+            this.props.previewAsync(this.mContext!.canvas.toDataURL())
         }
     }
-    const getWidth = () => {
-        return Math.round(imageSize.width * imageSize.scaleW / 100);
+
+    zoomImage(v: number) {
+        if (!this.mFile) return;
+
+        this.imageSize.scaleW = v;
+
+        this.drawImageE()
     }
 
-    const getHeight = () => {
-        return Math.round(imageSize.height * imageSize.scaleW / 100);
+
+    previewF(){
+        if (this.props.preview) {
+            this.props.preview(this.mContext!.canvas.toDataURL())
+        }
+    }
+    getWidth(){
+        return Math.round(this.imageSize.width * this.imageSize.scaleW / 100);
     }
 
-    const formUpload = () => {
+     getHeight(){
+        return Math.round(this.imageSize.height * this.imageSize.scaleW / 100);
+    }
+
+    formUpload(){
         try {
-            if (beforeUpload) {
-                beforeUpload();
+            if (this.props.beforeUpload) {
+                this.props.beforeUpload();
             }
             const xhr = new XMLHttpRequest();
-            xhr.open("POST", url);
+            xhr.open("POST", this.props.url!);
             const formData = new FormData();
-            if (callbackFormData) {
+            if (this.props.callbackFormData) {
 
-                if (typeof callbackFormData === 'function') {
-                    formData.append("data", JSON.stringify(callbackFormData()))
-                } else if (typeof callbackFormData === 'string') {
+                if (typeof this.props.callbackFormData === 'function') {
+                    formData.append("data", JSON.stringify(this.props.callbackFormData()))
+                } else if (typeof this.props.callbackFormData === 'string') {
                     {
-                        formData.append("data", callbackFormData)
+                        formData.append("data", this.props.callbackFormData)
                     }
-                } else if (typeof callbackFormData === 'object') {
+                } else if (typeof this.props.callbackFormData === 'object') {
                     {
-                        formData.append("data", JSON.stringify(callbackFormData))
+                        formData.append("data", JSON.stringify(this.props.callbackFormData))
                     }
                 }
 
             }
 
 
-            if (headerKeyValue) {
-                for (const key in headerKeyValue) {
+            if (this.props.headerKeyValue) {
+                for (const key in this.props.headerKeyValue) {
 
-                    xhr.setRequestHeader(key, headerKeyValue[key]);
+                    xhr.setRequestHeader(key, this.props.headerKeyValue[key]);
                 }
             }
-            formData.append("avatar", mContext!.canvas.toDataURL());
+            formData.append("avatar", this.mContext!.canvas.toDataURL());
             xhr.onreadystatechange = (d) => {
 
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
-                        if (done) {
+                        if (this.props.done) {
                             // @ts-ignore
-                            done(d.target.response);
+                            this.props.done(d.target.response);
+                            this.clear()
                         }
                     } else {
                         const innerText = `Error: ${xhr.status} ${xhr.statusText} ${xhr.responseText} `
-                        if (serverError) {
-                            serverError(innerText)
+                        if (this.props.serverError) {
+                            this.props.serverError(innerText)
                         }
                     }
 
                 }
-                clear()
+
 
 
             }
             xhr.upload.addEventListener("progress", (e) => {
 
-                if (progress) {
-                    progress(e)
+                if (this.props.progress) {
+                    this.props.progress(e)
                 }
             });
             xhr.send(formData)
         } catch (e: any) {
             alert(e)
-            if (clientError) {
-                clientError(e)
+            if (this.props.clientError) {
+                this.props.clientError(e)
             }
         }
 
     }
 
-    const clear = () => {
-        coord.x = 0;
-        coord.y = 0;
-        coordE.x = 0;
-        coordE.y = 0;
-        coordS.x = 0;
-        coordS.y = 0
-        base_image = undefined;
-        isStart = false;
-        mFile = undefined;
-
-        mContext!.clearRect(0, 0, mRefCanvas.current!.width, mRefCanvas.current!.height);
-
-        mRefPanelButtons.current!.style.visibility = "hidden"
+    clear() {
+        this.coord.x = 0;
+        this.coord.y = 0;
+        this.coordE.x = 0;
+        this.coordE.y = 0;
+        this.coordS.x = 0;
+        this.coordS.y = 0
+        this.base_image = undefined;
+        this.isStart = false;
+        this.mFile = undefined;
+        this.mContext!.clearRect(0, 0, this.mRefCanvas.current!.width, this.mRefCanvas.current!.height);
+        this.mRefPanelButtons.current!.style.visibility = "hidden"
     }
 
-    return (
+    render() {
+        return (
 
-        <>
+            <>
 
-            <div ref={mRefRotDiv} className={className}>
-                <div className='sau-head'>
-                    <div id="sau-b-0" className="sau-link" onClick={() => {
-                        mRefInputFile.current!.click()
-                    }}>file
-                    </div>
-                    <input type="file" ref={mRefInputFile} className="sau-file" onChange={onFileChange}
-                           accept="image/png, image/jpeg"/>
-                </div>
-
-                <div className='sau-attribute' style={{textAlign: "center"}}>
-
-                    <canvas ref={mRefCanvas} className={classNameCanvas} id="sau"/>
-
-                    <div ref={mRefPanelButtons} style={{visibility: "hidden"}}>
-
-                        <div style={{display: "flex"}}>
-                            <div style={{fontSize: 12}}>zoom:</div>
-                            <input style={{width: "90%", paddingLeft: 5}} onChange={(e) => {
-                                const v = 100 - parseInt(e.target.value);
-                                zoomImage(v)
-                            }} ref={mRefZoom} type="range" min="0" max="99" defaultValue="0" step="1"/>
+                <div ref={this.mRefRotDiv} className={this.props.className}>
+                    <div className='sau-head'>
+                        <div id="sau-b-0" className="sau-link" onClick={() => {
+                            this.mRefInputFile.current!.click()
+                        }}>file
                         </div>
-                        <div ref={mRefLink1} id="sau-b-1" className="sau-link" onClick={previewF}>preview</div>
-                        <div ref={mRefLink2} id="sau-b-2" className="sau-link" onClick={formUpload}>upload</div>
-
-
+                        <input type="file" ref={this.mRefInputFile} className="sau-file" onChange={this.onFileChange}
+                               accept="image/png, image/jpeg"/>
                     </div>
 
+                    <div className='sau-attribute' style={{textAlign: "center"}}>
+
+                        <canvas ref={this.mRefCanvas} className={this.props.classNameCanvas} id="sau"/>
+
+                        <div ref={this.mRefPanelButtons} style={{visibility: "hidden"}}>
+
+                            <div style={{display: "flex"}}>
+                                <div style={{fontSize: 12}}>zoom:</div>
+                                <input style={{width: "90%", paddingLeft: 5}} onChange={(e) => {
+                                    const v = 100 - parseInt(e.target.value);
+                                    this.zoomImage(v)
+                                }} ref={this.mRefZoom} type="range" min="0" max="99" defaultValue="0" step="1"/>
+                            </div>
+                            <div ref={this.mRefLink1} id="sau-b-1" className="sau-link" onClick={this.previewF}>preview</div>
+                            <div ref={this.mRefLink2} id="sau-b-2" className="sau-link" onClick={this.formUpload}>upload</div>
+
+
+                        </div>
+
+                    </div>
                 </div>
-            </div>
 
 
-        </>
-    )
+            </>
+        )
+    }
+
+
+
 };
-export default AvatarUploader
+

@@ -1,0 +1,1 @@
+export * from './avatar/index_inner'
