@@ -1,9 +1,10 @@
 {
   "name": "bsr-sau",
-  "version": "1.1.4",
-  "description": "Made with rollup",
+  "version": "1.1.5",
+  "description": "Simple avatar uploader",
   "author": "ionson100",
   "license": "MIT",
+  "keywords": ["avatar uploader","avatar"],
   "repository": "https://github.com/ionson100/bsr-menu",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -31,8 +32,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "build": "rollup -c --bundleConfigAsCjs",
-    "test": "react-scripts test"
+    "build": "rollup -c --bundleConfigAsCjs && @powershell copy  ./src/avatar/index.css ./dist"
   },
   "eslintConfig": {
     "extends": [

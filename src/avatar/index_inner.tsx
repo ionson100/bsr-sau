@@ -1,29 +1,95 @@
 import React, {ChangeEvent, Component, createRef} from 'react';
-import './index.css'
+
+//import './index.css'
 
 
 interface AvatarProps {
 
+    /**
+     * Canvas size (square)
+     */
     canvasSize: number,
-    selectedFile?: (f: File | null) => boolean,
-    callbackFormData?: | object | string,
+
+    /**
+     * File selection event
+     * @param f selected file
+     */
+    selectedFile?: (f: File | null | undefined) => boolean | undefined,
+
+
+    /**
+     * User data that the user wants to send to the server along with the file
+     */
+    callbackFormData?:  object | string,
+
+
+    /**
+     * Url server
+     */
     url?: string,
+
+
+    /**
+     * An object with key - value fields that are inserted into the request header
+     */
     headerKeyValue?: { [key: string]: string },
+
+
+    /**
+     * Event marker before transferring the file to the server
+     */
     beforeUpload?: () => void,
+
+
+    /**
+     * Browser side error event
+     * @param event
+     */
     clientError?: (event: string) => void,
+
+
+    /**
+     * Attributes for plotting download progress
+     * @param events
+     */
     progress?: (events: ProgressEvent<XMLHttpRequestEventTarget>) => void,
+
+    /**
+     * Click preview
+     * @param events url image
+     */
     preview?: (events: string) => void,
+
+    /**
+     * Continuous preview
+     * @param events url image
+     */
     previewAsync?: (events: string) => void,
+    /**
+     * Successful sending event to the server
+     * @param events Data that the server side wants to transfer to the client
+     */
     done?: (events: any) => void,
+
+    /**
+     * Server side error event
+     * @param events
+     */
     serverError?: (events: string) => void,
+
+
+    /**
+     * Show button Preview
+     */
     visibleLinkPreview?: boolean,
     className?: string,
     classNameCanvas?: string
 
 
+
 }
 
- export const AvatarUploader = class extends Component<AvatarProps, any> {
+export default class AvatarUploader extends Component<AvatarProps, any> {
     static defaultProps: AvatarProps = {
         canvasSize: 200,
         selectedFile: undefined,
@@ -39,7 +105,8 @@ interface AvatarProps {
         serverError: undefined,
         visibleLinkPreview: undefined,
         className: 'sau',
-        classNameCanvas: 'canvas-sau'
+        classNameCanvas: 'canvas-sau',
+
     };
     public readonly mRefInputFile: React.RefObject<HTMLInputElement>;
     public readonly mRefZoom: React.RefObject<HTMLInputElement>;
@@ -62,7 +129,6 @@ interface AvatarProps {
         scaleW: number,
     }
     public mContext: CanvasRenderingContext2D | null;
-
 
 
     constructor(props: Readonly<AvatarProps>) {
@@ -88,13 +154,13 @@ interface AvatarProps {
         }
         this.mContext = null;
 
-        this.onFileChange=this.onFileChange.bind(this)
-        this.previewF=this.previewF.bind(this);
-        this.formUpload=this.formUpload.bind(this);
-        this.stop=this.stop.bind(this);
-        this.start=this.start.bind(this)
-        this.wheel=this.wheel.bind(this)
-        this.draw=this.draw.bind(this)
+        this.onFileChange = this.onFileChange.bind(this)
+        this.previewF = this.previewF.bind(this);
+        this.formUpload = this.formUpload.bind(this);
+        this.stop = this.stop.bind(this);
+        this.start = this.start.bind(this)
+        this.wheel = this.wheel.bind(this)
+        this.draw = this.draw.bind(this)
     }
 
     componentDidMount() {
@@ -116,6 +182,8 @@ interface AvatarProps {
 
 
     wheel(e: WheelEvent) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
         if (!this.mFile) return;
         e = e || window.event;
         const v = parseInt(this.mRefZoom!.current!.value)
@@ -128,6 +196,7 @@ interface AvatarProps {
             this.mRefZoom.current!.value! = (v - 1) + "";
             this.zoomImage(100 - v)
         }
+
     }
 
     start(e: MouseEvent) {
@@ -160,7 +229,7 @@ interface AvatarProps {
         this.drawImageE();
     }
 
-    onFileChange(event: ChangeEvent<HTMLInputElement>){
+    onFileChange(event: ChangeEvent<HTMLInputElement>) {
 
 
         const fs = event.target.files;
@@ -184,25 +253,20 @@ interface AvatarProps {
         }
 
 
-
-
-
         const imgSrc = window.URL.createObjectURL(this.mFile);
         this.base_image = new Image();
         this.base_image.src = imgSrc;
-        this.base_image.onload=()=>{
-            if(this.base_image?.width){
-                this.imageSize.width=this.base_image.width
+        this.base_image.onload = () => {
+            if (this.base_image?.width) {
+                this.imageSize.width = this.base_image.width
             }
-            if(this.base_image?.height){
-                this.imageSize.height=this.base_image.height
+            if (this.base_image?.height) {
+                this.imageSize.height = this.base_image.height
             }
             this.drawImageE();
 
         }
         this.mRefPanelButtons.current!.style.visibility = "visible";
-
-
 
 
     }
@@ -224,20 +288,24 @@ interface AvatarProps {
     }
 
 
-    previewF(){
+    previewF() {
         if (this.props.preview) {
             this.props.preview(this.mContext!.canvas.toDataURL())
         }
     }
-    getWidth(){
+    public getCanvasFormData():string{
+        return this.mContext!.canvas.toDataURL();
+    }
+
+    getWidth() {
         return Math.round(this.imageSize.width * this.imageSize.scaleW / 100);
     }
 
-     getHeight(){
+    getHeight() {
         return Math.round(this.imageSize.height * this.imageSize.scaleW / 100);
     }
 
-    formUpload(){
+    formUpload() {
         try {
             if (this.props.beforeUpload) {
                 this.props.beforeUpload();
@@ -288,7 +356,6 @@ interface AvatarProps {
                 }
 
 
-
             }
             xhr.upload.addEventListener("progress", (e) => {
 
@@ -298,7 +365,7 @@ interface AvatarProps {
             });
             xhr.send(formData)
         } catch (e: any) {
-            alert(e)
+
             if (this.props.clientError) {
                 this.props.clientError(e)
             }
@@ -318,6 +385,10 @@ interface AvatarProps {
         this.mFile = undefined;
         this.mContext!.clearRect(0, 0, this.mRefCanvas.current!.width, this.mRefCanvas.current!.height);
         this.mRefPanelButtons.current!.style.visibility = "hidden"
+        if(this.mRefInputFile.current){
+            this.mRefInputFile.current.value='';
+        }
+
     }
 
     render() {
@@ -348,8 +419,12 @@ interface AvatarProps {
                                     this.zoomImage(v)
                                 }} ref={this.mRefZoom} type="range" min="0" max="99" defaultValue="0" step="1"/>
                             </div>
-                            <div ref={this.mRefLink1} id="sau-b-1" className="sau-link" onClick={this.previewF}>preview</div>
-                            <div ref={this.mRefLink2} id="sau-b-2" className="sau-link" onClick={this.formUpload}>upload</div>
+                            <div ref={this.mRefLink1} id="sau-b-1" className="sau-link"
+                                 onClick={this.previewF}>preview
+                            </div>
+                            <div ref={this.mRefLink2} id="sau-b-2" className="sau-link"
+                                 onClick={this.formUpload}>upload
+                            </div>
 
 
                         </div>
@@ -361,8 +436,6 @@ interface AvatarProps {
             </>
         )
     }
-
-
-
 };
+
 

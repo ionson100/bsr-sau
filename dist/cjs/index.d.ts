@@ -1,2 +1,2 @@
 import AvatarUploader from "./avatar";
-export default AvatarUploader
+export default AvatarUploader;
