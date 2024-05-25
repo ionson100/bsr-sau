@@ -20,7 +20,7 @@ interface AvatarProps {
     /**
      * User data that the user wants to send to the server along with the file
      */
-    callbackFormData?:  object | string,
+    callbackFormData?: any,
 
 
     /**
