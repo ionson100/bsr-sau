@@ -3085,8 +3085,8 @@ var AvatarUploader = /** @class */ (function (_super) {
                                     var v = 100 - parseInt(e.target.value);
                                     _this.zoomImage(v);
                                 }, ref: this.mRefZoom, type: "range", min: "0", max: "99", defaultValue: "0", step: "1" })),
-                        React.createElement("div", { ref: this.mRefLink1, id: "sau-b-1", className: "sau-link", onClick: this.previewF }, "preview"),
-                        React.createElement("div", { ref: this.mRefLink2, id: "sau-b-2", className: "sau-link", onClick: this.formUpload }, "upload"))))));
+                        React.createElement("div", { ref: this.mRefLink1, "data-sau": "l1", className: "sau-link", onClick: this.previewF }, "preview"),
+                        React.createElement("div", { ref: this.mRefLink2, "data-sau": "l2", className: "sau-link", onClick: this.formUpload }, "upload"))))));
     };
     AvatarUploader.defaultProps = {
         canvasSize: 200,

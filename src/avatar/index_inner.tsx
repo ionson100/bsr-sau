@@ -425,10 +425,10 @@ export default class AvatarUploader extends Component<AvatarProps, any> {
                                     this.zoomImage(v)
                                 }} ref={this.mRefZoom} type="range" min="0" max="99" defaultValue="0" step="1"/>
                             </div>
-                            <div ref={this.mRefLink1} id="sau-b-1" className="sau-link"
+                            <div ref={this.mRefLink1} data-sau="l1" className="sau-link"
                                  onClick={this.previewF}>preview
                             </div>
-                            <div ref={this.mRefLink2} id="sau-b-2" className="sau-link"
+                            <div ref={this.mRefLink2} data-sau="l2" className="sau-link"
                                  onClick={this.formUpload}>upload
                             </div>
 
