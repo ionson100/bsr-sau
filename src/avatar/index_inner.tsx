@@ -236,7 +236,13 @@ export default class AvatarUploader extends Component<AvatarProps, any> {
         if (!fs) {
             return
         }
-        this.mFile = fs!.item(0)
+
+        const tempFile=fs!.item(0)
+        if(!tempFile){
+            return;
+        }
+        this.mFile = tempFile
+
 
         if (this.props.selectedFile) {
             if (!this.props.selectedFile(this.mFile)) {
