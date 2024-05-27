@@ -85,6 +85,10 @@ interface AvatarProps {
     className?: string,
     classNameCanvas?: string
 
+    style?: React.CSSProperties | undefined,
+
+    styleCanvas?:React.CSSProperties | undefined
+
 
 
 }
@@ -402,7 +406,7 @@ export default class AvatarUploader extends Component<AvatarProps, any> {
 
             <>
 
-                <div ref={this.mRefRotDiv} className={this.props.className}>
+                <div ref={this.mRefRotDiv} className={this.props.className} style={this.props.style}>
                     <div className='sau-head'>
                         <div id="sau-b-0" className="sau-link" onClick={() => {
                             this.mRefInputFile.current!.click()
@@ -414,7 +418,7 @@ export default class AvatarUploader extends Component<AvatarProps, any> {
 
                     <div className='sau-attribute' style={{textAlign: "center"}}>
 
-                        <canvas ref={this.mRefCanvas} className={this.props.classNameCanvas} id="sau"/>
+                        <canvas ref={this.mRefCanvas} className={this.props.classNameCanvas} id="sau" style={this.props.styleCanvas}/>
 
                         <div ref={this.mRefPanelButtons} style={{visibility: "hidden"}}>
 

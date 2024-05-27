@@ -3072,14 +3072,14 @@ var AvatarUploader = /** @class */ (function (_super) {
     AvatarUploader.prototype.render = function () {
         var _this = this;
         return (React.createElement(React.Fragment, null,
-            React.createElement("div", { ref: this.mRefRotDiv, className: this.props.className },
+            React.createElement("div", { ref: this.mRefRotDiv, className: this.props.className, style: this.props.style },
                 React.createElement("div", { className: 'sau-head' },
                     React.createElement("div", { id: "sau-b-0", className: "sau-link", onClick: function () {
                             _this.mRefInputFile.current.click();
                         } }, "file"),
                     React.createElement("input", { type: "file", ref: this.mRefInputFile, className: "sau-file", onChange: this.onFileChange, accept: "image/png, image/jpeg" })),
                 React.createElement("div", { className: 'sau-attribute', style: { textAlign: "center" } },
-                    React.createElement("canvas", { ref: this.mRefCanvas, className: this.props.classNameCanvas, id: "sau" }),
+                    React.createElement("canvas", { ref: this.mRefCanvas, className: this.props.classNameCanvas, id: "sau", style: this.props.styleCanvas }),
                     React.createElement("div", { ref: this.mRefPanelButtons, style: { visibility: "hidden" } },
                         React.createElement("div", { style: { display: "flex" } },
                             React.createElement("div", { style: { fontSize: 12 } }, "zoom:"),

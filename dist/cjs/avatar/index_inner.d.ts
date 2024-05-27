@@ -63,6 +63,8 @@ interface AvatarProps {
     visibleLinkPreview?: boolean;
     className?: string;
     classNameCanvas?: string;
+    style?: React.CSSProperties | undefined;
+    styleCanvas?: React.CSSProperties | undefined;
 }
 export default class AvatarUploader extends Component<AvatarProps, any> {
     static defaultProps: AvatarProps;
