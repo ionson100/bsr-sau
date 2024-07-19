@@ -422,9 +422,9 @@ export default class AvatarUploader extends Component<AvatarProps, any> {
 
                         <div ref={this.mRefPanelButtons} style={{visibility: "hidden"}}>
 
-                            <div style={{display: "flex"}}>
-                                <div style={{fontSize: 12}}>zoom:</div>
-                                <input style={{width: "90%", paddingLeft: 5}} onChange={(e) => {
+                            <div className='sau-label-zoom'>
+                                <div>zoom:</div>
+                                <input  onChange={(e) => {
                                     const v = 100 - parseInt(e.target.value);
                                     this.zoomImage(v)
                                 }} ref={this.mRefZoom} type="range" min="0" max="99" defaultValue="0" step="1"/>

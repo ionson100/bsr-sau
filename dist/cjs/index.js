@@ -3081,9 +3081,9 @@ var AvatarUploader = /** @class */ (function (_super) {
                 React.createElement("div", { className: 'sau-attribute', style: { textAlign: "center" } },
                     React.createElement("canvas", { ref: this.mRefCanvas, className: this.props.classNameCanvas, id: "sau", style: this.props.styleCanvas }),
                     React.createElement("div", { ref: this.mRefPanelButtons, style: { visibility: "hidden" } },
-                        React.createElement("div", { style: { display: "flex" } },
-                            React.createElement("div", { style: { fontSize: 12 } }, "zoom:"),
-                            React.createElement("input", { style: { width: "90%", paddingLeft: 5 }, onChange: function (e) {
+                        React.createElement("div", { className: 'sau-label-zoom' },
+                            React.createElement("div", null, "zoom:"),
+                            React.createElement("input", { onChange: function (e) {
                                     var v = 100 - parseInt(e.target.value);
                                     _this.zoomImage(v);
                                 }, ref: this.mRefZoom, type: "range", min: "0", max: "99", defaultValue: "0", step: "1" })),

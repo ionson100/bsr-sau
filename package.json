@@ -1,20 +1,20 @@
 {
   "name": "bsr-sau",
-  "version": "2.1.2",
+  "version": "2.1.4",
   "description": "Simple avatar uploader",
   "author": "ionson100",
   "license": "MIT",
   "keywords": ["avatar uploader","avatar","uploader"],
-  "repository": "https://github.com/ionson100/bsr-menu",
+  "repository": "https://github.com/ionson100/bsr-sau",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
-  "homepage": "https://github.com/ionson100/bsr-menu",
+  "homepage": "https://github.com/ionson100/bsr-sau",
   "files": [
     "dist",
     "README.md"
   ],
-  "private": true,
+
   "peerDependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

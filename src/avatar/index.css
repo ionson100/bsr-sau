@@ -27,10 +27,12 @@
     opacity: 1;
     text-align: left;
 }
+
 .sau-head {
 
 }
-.canvas-sau{
+
+.canvas-sau {
     background: cornsilk;
 }
 
@@ -45,4 +47,15 @@
 .sau-link:active {
     opacity: 1;
     color: #f30b0b;
+}
+
+.sau-label-zoom {
+    display: flex;
+    justify-content: center;
+    font-size: 15px;
+}
+
+.sau-label-zoom input {
+    width: 90%;
+    padding-left: 5px;
 }
