@@ -52,10 +52,10 @@
 .sau-label-zoom {
     display: flex;
     justify-content: center;
+    align-items: center;
     font-size: 15px;
 }
 
 .sau-label-zoom input {
-    width: 90%;
-    padding-left: 5px;
+    width: 100%;
 }
